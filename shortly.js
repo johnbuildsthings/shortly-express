@@ -27,7 +27,7 @@ app.use(session({secret:'shhhhhhhh',
 // app.use(express.session());
 
 var restrict = function(req, res, next){
-  if(req.session.user){
+  if(req.session.username){
     next();
   }else{
     res.redirect('/login');
@@ -120,8 +120,12 @@ app.post('/login', function(req, res){
 
   new User({username: username, password: password}).fetch().then(function(found) {
     if (found) {
-      // Set req.session.user === ?
-      res.redirect('/');
+      req.session.regenerate(function() {
+        req.session.username = username;
+        restrict(req, res, function() {
+          res.render('index');
+        });
+      });
     }
     else {
       res.redirect('/signup');

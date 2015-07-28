@@ -34,11 +34,10 @@ var restrict = function(req, res, next){
   }
 }
 
-
 app.get('/', function(req, res) {
   // res.redirect('/login');
   restrict(req, res, function(){
-    res.render('index');
+    res.render('index'); // render automatically looks in views
   });
 });
 
@@ -89,26 +88,47 @@ app.post('/links', function(req, res) {
   });
 });
 
+app.get('/signup', function(req, res) {
+  res.render('signup');
+});
+
+app.post('/signup', function(req, res){
+  var user = new User({
+    username: req.body.username,
+    password: req.body.password
+  });
+
+  user.save().then(function(newUser){
+    Users.add(newUser);
+    Users.fetch().then(function(content){
+      res.status(200).send(content);
+    });
+  });
+});
+
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
 
 app.get('/login', function(req, res){
-  response.render('login');
+  res.render('login');
 });
 
 app.post('/login', function(req, res){
-  if(err){
-    console.log('error in login creation');
-    return res.send(404);
-  }else{
-    // Check if valid user
-    isValidUser(req);
-  }
+  var username = req.body.username;
+  var password = req.body.password;
 
+  new User({username: username, password: password}).fetch().then(function(found) {
+    if (found) {
+      // Set req.session.user === ?
+      res.redirect('/');
+    }
+    else {
+      res.redirect('/signup');
+    }
+
+  });
 });
-
-
 
 
 
@@ -142,3 +162,4 @@ app.get('/*', function(req, res) {
 
 console.log('Shortly is listening on 4568');
 app.listen(4568);
+

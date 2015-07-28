@@ -103,7 +103,7 @@ app.post('/login', function(req, res){
     return res.send(404);
   }else{
     // Check if valid user
-    
+    isValidUser(req);
   }
 
 });

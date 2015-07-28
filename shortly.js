@@ -2,7 +2,7 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
-
+var session = require('express-session');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -21,27 +21,42 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
+app.use(session({secret:'shhhhhhhh',
+  saveUninitialized: true,
+  resave: true}));
+// app.use(express.session());
+
+var restrict = function(req, res, next){
+  if(req.session.user){
+    next();
+  }else{
+    res.redirect('/login');
+  }
+}
 
 
-app.get('/', 
-function(req, res) {
-  res.render('index');
-});
-
-app.get('/create', 
-function(req, res) {
-  res.render('index');
-});
-
-app.get('/links', 
-function(req, res) {
-  Links.reset().fetch().then(function(links) {
-    res.send(200, links.models);
+app.get('/', function(req, res) {
+  // res.redirect('/login');
+  restrict(req, res, function(){
+    res.render('index');
   });
 });
 
-app.post('/links', 
-function(req, res) {
+app.get('/create', function(req, res) {
+  restrict(req, res, function() {
+    res.render('index');
+  });
+});
+
+app.get('/links', function(req, res) {
+  restrict(req, res, function() {
+    Links.reset().fetch().then(function(links) {
+      res.send(200, links.models);
+    });
+  });
+});
+
+app.post('/links', function(req, res) {
   var uri = req.body.url;
 
   if (!util.isValidUrl(uri)) {
@@ -77,6 +92,23 @@ function(req, res) {
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+
+app.get('/login', function(req, res){
+  response.render('login');
+});
+
+app.post('/login', function(req, res){
+  if(err){
+    console.log('error in login creation');
+    return res.send(404);
+  }else{
+    // Check if valid user
+    
+  }
+
+});
+
+
 
 
 

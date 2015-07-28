@@ -143,8 +143,9 @@ app.post('/login', function(req, res){
 });
 
 
-app.post('/', function(req, res){
-  console.log('HEY IM LOGGED');
+app.get('/logout', function(req, res){
+  req.session.destroy();
+  res.redirect('/login');
 });
 
 

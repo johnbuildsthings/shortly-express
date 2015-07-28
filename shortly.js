@@ -100,10 +100,18 @@ app.post('/signup', function(req, res){
 
   user.save().then(function(newUser){
     Users.add(newUser);
-    Users.fetch().then(function(content){
-      res.status(200).send(content);
+    // Users.fetch().then(function(content){
+    //   res.status(200).send(content);
+    // });
+    req.session.regenerate(function() {
+      req.session.username = req.body.username;
+      restrict(req, res, function() {
+        res.redirect('/');
+      });
     });
+    res.status(200); 
   });
+
 });
 
 /************************************************************/
@@ -123,17 +131,21 @@ app.post('/login', function(req, res){
       req.session.regenerate(function() {
         req.session.username = username;
         restrict(req, res, function() {
-          res.render('index');
+          res.redirect('/');
         });
       });
     }
     else {
-      res.redirect('/signup');
+      res.redirect('/login');
     }
 
   });
 });
 
+
+app.post('/', function(req, res){
+  console.log('HEY IM LOGGED');
+});
 
 
 /************************************************************/
